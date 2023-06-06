@@ -23,11 +23,17 @@ const searchClient = algoliasearch("6V4U26IN4K", "20e488ed9f87b0b54e36cb36667512
 const Hits = connectHits(({ hits }) => (
   <div className="bg-white shadow overflow-hidden sm:rounded-lg mb-2">
     {hits.map(hit => (
+      <a    href={hit.permalink} target="_blank" rel="noopener noreferrer">
       <div className="px-4 py-5 sm:px-6" key={hit.objectID}>
         <h3 className="text-lg leading-6 font-medium text-gray-900">
           {hit.post_title}  {/* assuming "title" is a field in your Algolia index data */}
         </h3>
+        <p className="mt-1 max-w-2xl text-sm text-gray-500">
+          {hit.parent_website_url} {/* assuming "excerpt" is a field in your Algolia index data */}
+        </p>
+
       </div>
+      </a>
     ))}
   </div>
 ));
