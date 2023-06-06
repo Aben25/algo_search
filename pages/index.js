@@ -32,36 +32,26 @@ const Hits = connectHits(({ hits }) => (
   </div>
 ));
 
-
-// Other imports and definitions...
-
-const IndexComponent = ({ indexName }) => (
-  <InstantSearch searchClient={searchClient} indexName={indexName}>
-    <Configure hitsPerPage={10} />
-    <Results />
-  </InstantSearch>
+// Custom Results component that only shows hits when a query has been made
+const Results = connectStateResults(
+  ({ searchState }) => searchState && searchState.query
+    ? <Hits />
+    : null
 );
+
 export default function Home() {
-
-
   return (
-    <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8 mb-0">
+    <div className="">
       <InstantSearch searchClient={searchClient} indexName="wp_searchable_posts">
         <Configure hitsPerPage={10} />
         <SearchBox />
-
         <Index indexName="tdf_searchable_posts">
-          <h2>tdf_searchable_posts</h2>
-          <Hits />
+          <Results />
         </Index>
-
         <Index indexName="artba_searchable_posts">
-          <h2>tdf_searchable_posts1</h2>
-          <Hits />
+          <Results />
         </Index>
-
       </InstantSearch>
-
     </div>
   );
 }
