@@ -56,7 +56,7 @@ export default function Home() {
         </Index>
 
         <Index indexName="artba_searchable_posts">
-          <h2>tdf_searchable_posts</h2>
+          <h2>tdf_searchable_posts1</h2>
           <Hits />
         </Index>
 
