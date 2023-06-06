@@ -4,7 +4,6 @@ import Link from "next/link";
 import axios from "axios";
 import algoliasearch from "algoliasearch";
 import { useRouter } from "next/router";
-import { RefreshContext } from "/contexts/RefreshContext";
 import { useContext } from "react";
 
 import router from "next/router";

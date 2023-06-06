@@ -9,6 +9,8 @@ import {
   InfiniteHits,
   connectStateResults,
   SearchBox,
+  connectHits,
+  Index,
 } from "react-instantsearch-dom";
 import "instantsearch.css/themes/reset.css";
 import "tailwindcss/tailwind.css";
@@ -17,19 +19,44 @@ import { useContext } from "react";
 // define algolia client
 const searchClient = algoliasearch("6V4U26IN4K", "20e488ed9f87b0b54e36cb36667512f7");
 
+// create a custom hit component
+const CustomHits = connectHits(({ hits }) => (
+  <div className="bg-white shadow overflow-hidden sm:rounded-lg mb-2">
+    {hits.map(hit => (
+      <div className="px-4 py-5 sm:px-6" key={hit.objectID}>
+        <h3 className="text-lg leading-6 font-medium text-gray-900">
+          {hit.title}  {/* assuming "title" is a field in your Algolia index data */}
+        </h3>
+      </div>
+    ))}
+  </div>
+));
+
+const Results = connectStateResults(
+  ({ searchState }) => searchState && searchState.query ? <CustomHits /> : null
+);
+
+
 
 export default function Home() {
 
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8 mb-0">
-      <h1>Test1</h1>
-      <InstantSearch searchClient={searchClient} indexName="wp_searchable_posts">
-        <Configure hitsPerPage={10} />
-        <SearchBox />
-        <InfiniteHits />
-      </InstantSearch>
-      
+      <InstantSearch searchClient={searchClient}>
+      <SearchBox />
+      <Configure hitsPerPage={10} />
+      <Index indexName="novi_events">
+        <Results />
+      </Index>
+      <Index indexName="wp_searchable_posts">
+        <Results />
+      </Index>
+      <Index indexName="tdf_searchable_posts">
+        <Results />
+      </Index>
+    </InstantSearch>
+    
     </div>
   );
 }
