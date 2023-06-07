@@ -43,10 +43,28 @@ const Hits = connectHits(({ hits }) => (
 
 // Custom Results component that only shows hits when a query has been made
 const Results = connectStateResults(
-  ({ searchState }) => 
-     <Hits />
-    
+  ({ searchState }) =>
+    <Hits />
+
 );
+
+const NoviEventsHits = connectHits(({ hits }) => (
+  <div className="bg-white shadow overflow-hidden sm:rounded-lg mb-2">
+    {hits.map(hit => (
+      <div className="px-4 py-5 sm:px-6" key={hit.EventUniqueId}>
+        <a href={hit.Url} target="_blank" rel="noopener noreferrer">
+          <h3 className="text-lg leading-6 font-medium text-gray-900">
+            {hit.Name}
+          </h3>
+        </a>
+        <p className="mt-1 max-w-2xl text-sm text-gray-500">
+          {hit.Details.substring(0, 150)}
+        </p>
+      </div>
+    ))}
+  </div>
+));
+
 
 const CustomRefinementList = ({ items, refine }) => (
   <ul>
@@ -69,6 +87,9 @@ const CustomRefinementList = ({ items, refine }) => (
 const ConnectedRefinementList = connectRefinementList(CustomRefinementList);
 
 export default function Home() {
+
+
+
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8 mb-0 flex">
       <InstantSearch searchClient={searchClient} indexName="artba_searchable_posts">
@@ -76,10 +97,10 @@ export default function Home() {
         <div className="w-1/4 p-4">
           <h2 className="text-lg leading-7 font-medium text-gray-900">Filter</h2>
           <hr className="mt-2 mb-2" />
-          <h5>Post Type</h5>
-          <RefinementList attribute="post_type" />
           <h5>Category</h5>
           <RefinementList attribute="taxonomies.category" />
+          <h5>Post Type</h5>
+          <RefinementList attribute="post_type" />
           <h5>Permalink</h5>
           <ConnectedRefinementList attribute="permalink" />
         </div>
@@ -96,6 +117,11 @@ export default function Home() {
           <Index indexName="tdf_searchable_posts">
             <h2>TDF</h2>
             <Results />
+          </Index>
+
+          <Index indexName="novi_events">
+            <h2>Novi Events</h2>
+            <NoviEventsHits />
           </Index>
         </div>
       </InstantSearch>
