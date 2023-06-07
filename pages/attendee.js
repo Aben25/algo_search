@@ -1,91 +1,63 @@
-import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useState, useEffect } from "react";
+import Head from "next/head";
+import { useRouter } from "next/router";
+import algoliasearch from "algoliasearch/lite";
+import {
+  InstantSearch,
+  Configure,
+  RefinementList,
+  InfiniteHits,
+  connectStateResults,
+  SearchBox,
+  connectHits,
+  Index,
+} from "react-instantsearch-dom";
+import "instantsearch.css/themes/reset.css";
+import "tailwindcss/tailwind.css";
+import { useContext } from "react";
 
-const AttendeePage = () => {
-  const router = useRouter();
-  const { FullName, Email, CompanyName, AttendeeUniqueID } = router.query;
-  const [showPopup, setShowPopup] = useState(false);
-  const [showConfirmation, setShowConfirmation] = useState(false);
+// define algolia client
+const searchClient = algoliasearch("6V4U26IN4K", "20e488ed9f87b0b54e36cb36667512f7");
 
-  const togglePopup = () => {
-    setShowPopup(!showPopup);
-  };
-
-  const send = async () => {
-    const response = await fetch(
-      `https://connect.artba.org/api/attendees/${AttendeeUniqueID}/mark-attended`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: 'Basic d2SuLwamTRQfEWqAuwBQ4zSTiSlq34mrICTaMeAIPS4=',
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-
-    if (response.ok) {
-      setShowConfirmation(true);
-      setShowPopup(false);
-    } else {
-      alert('Error checking in. Please try again.');
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="bg-white shadow-lg p-8 rounded-md">
-          <h2 className="text-2xl font-bold mb-6">{FullName}</h2>
-          <p className="mb-4">
-            <strong>Email: </strong>
-            {Email}
-          </p>
-          <p className="mb-6">
-            <strong>Company: </strong>
-            {CompanyName}
-          </p>
-          <button
-            className="bg-blue-600 text-white font-bold py-2 px-4 rounded"
-            onClick={togglePopup}
-          >
-            Check-in
-          </button>
-          {showPopup && (
-            <div className="fixed inset-0 z-10 flex items-center justify-center bg-black bg-opacity-50">
-              <div className="bg-white p-6 rounded-md">
-                <h3 className="text-xl font-bold mb-4">Confirm Check-in</h3>
-                <p>Do you want to check in {FullName}?</p>
-                <div className="mt-4">
-                  <button
-                    className="bg-blue-600 text-white font-bold py-2 px-4 rounded mr-2"
-                    onClick={send}
-                  >
-                    Check-in
-                  </button>
-                  <button
-                    className="bg-gray-300 text-black font-bold py-2 px-4 rounded"
-                    onClick={togglePopup}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-          {showConfirmation && (
-            <div className="fixed inset-0 z-10 flex items-center justify-center bg-green-500 bg-opacity-50">
-              <div className="bg-white p-6 rounded-md">
-                <h3 className="text-xl font-bold mb-4">Confirmation</h3>
-                <p>{FullName} has been successfully checked in.</p>
-              </div>
-            </div>
-          )}
-        </div>
+// create a custom hit component
+const Hits = connectHits(({ hits }) => (
+  <div className="bg-white shadow overflow-hidden sm:rounded-lg mb-2">
+    {hits.map(hit => (
+      <a    href={hit.permalink} target="_blank" rel="noopener noreferrer">
+      <div className="px-4 py-5 sm:px-6" key={hit.objectID}>
+        <h3 className="text-lg leading-6 font-medium text-gray-900">
+          {hit.post_title}  {/* assuming "title" is a field in your Algolia index data */}
+        </h3>
+        <p className="mt-1 max-w-2xl text-sm text-gray-500">
+          {hit.post_excerpt} {/* assuming "excerpt" is a field in your Algolia index data */}
+        </p>
+        
       </div>
+      </a>
+    ))}
+  </div>
+));
+
+// Custom Results component that only shows hits when a query has been made
+const Results = connectStateResults(
+  ({ searchState }) => searchState && searchState.query
+    ? <Hits />
+    : null
+);
+
+export default function Home() {
+  return (
+    <div className="">
+      <InstantSearch searchClient={searchClient} indexName="wp_searchable_posts">
+        <Configure hitsPerPage={10} />
+        <SearchBox />
+        <Index indexName="tdf_searchable_posts">
+          <Results />
+        </Index>
+        <Index indexName="artba_searchable_posts">
+          <Results />
+        </Index>
+      </InstantSearch>
     </div>
   );
-};
-
-export default AttendeePage;
-
-
+}
