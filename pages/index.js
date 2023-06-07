@@ -64,11 +64,12 @@ const NoviEventsHits = connectHits(({ hits }) => (
 
 // Custom Results component that only shows hits when a query has been made
 const Results = connectStateResults(
-  ({ searchState }) =>
-    <Hits />
-
+  ({ searchState, searchResults }) => 
+    searchResults && searchResults.nbHits !== 0 
+      ? <Hits /> 
+      : <p className=" mt-4 text-red-400">
+        No results found for {searchState.query}</p>
 );
-
 
 
 const CustomRefinementList = ({ items, refine }) => (
