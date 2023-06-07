@@ -14,21 +14,24 @@ import {
 } from "react-instantsearch-dom";
 import "instantsearch.css/themes/reset.css";
 import "tailwindcss/tailwind.css";
-import { useContext } from "react";
+import { FaSearch } from 'react-icons/fa';
 
 // define algolia client
 const searchClient = algoliasearch("6V4U26IN4K", "20e488ed9f87b0b54e36cb36667512f7");
-
+function stripHtml(html) {
+  let doc = new DOMParser().parseFromString(html, 'text/html');
+  return doc.body.textContent || "";
+}
 // create a custom hit component
 const Hits = connectHits(({ hits }) => (
   <div className="bg-white shadow overflow-hidden sm:rounded-lg mb-2">
     {hits.map(hit => (
-      <div className="px-4 py-5 sm:px-6" key={hit.objectID}>
+      <div className="px-4 py-1 sm:px-6" key={hit.objectID}>
         <a href={hit.permalink} target="_blank" rel="noopener noreferrer">
 
-          <h3 className="text-lg leading-6 font-medium text-gray-900">
+          <h4 className="text-md leading-6 font-small text-gray-900">
             {hit.post_title}  {/* assuming "title" is a field in your Algolia index data */}
-          </h3>
+          </h4>
         </a>
 
         <p className="mt-1 max-w-2xl text-sm text-gray-500">
@@ -41,6 +44,24 @@ const Hits = connectHits(({ hits }) => (
   </div>
 ));
 
+const NoviEventsHits = connectHits(({ hits }) => (
+  <div className="bg-white shadow overflow-hidden sm:rounded-lg mb-0">
+    {hits.map(hit => (
+      <div className="sm:px-6" key={hit.EventUniqueId}>
+        <a href={hit.Url} target="_blank" rel="noopener noreferrer">
+        <h4 className="text-md leading-6 font-small text-gray-900">
+            {hit.Name}
+          </h4>
+        </a>
+        <p className="ax-w-2xl text-sm text-gray-500">
+          {stripHtml(hit.Details).substring(0, 150)} ...
+        </p>
+      </div>
+    ))}
+  </div>
+));
+
+
 // Custom Results component that only shows hits when a query has been made
 const Results = connectStateResults(
   ({ searchState }) =>
@@ -48,22 +69,6 @@ const Results = connectStateResults(
 
 );
 
-const NoviEventsHits = connectHits(({ hits }) => (
-  <div className="bg-white shadow overflow-hidden sm:rounded-lg mb-2">
-    {hits.map(hit => (
-      <div className="px-4 py-5 sm:px-6" key={hit.EventUniqueId}>
-        <a href={hit.Url} target="_blank" rel="noopener noreferrer">
-          <h3 className="text-lg leading-6 font-medium text-gray-900">
-            {hit.Name}
-          </h3>
-        </a>
-        <p className="mt-1 max-w-2xl text-sm text-gray-500">
-          {hit.Details.substring(0, 150)}
-        </p>
-      </div>
-    ))}
-  </div>
-));
 
 
 const CustomRefinementList = ({ items, refine }) => (
@@ -98,29 +103,36 @@ export default function Home() {
           <h2 className="text-lg leading-7 font-medium text-gray-900">Filter</h2>
           <hr className="mt-2 mb-2" />
           <h5>Category</h5>
-          <RefinementList attribute="taxonomies.category" />
+          <RefinementList attribute="taxonomies.category" limit={5} />
+          <h5>Author</h5>
+          <RefinementList attribute="post_author.display_name" limit={5} />
           <h5>Post Type</h5>
-          <RefinementList attribute="post_type" />
-          <h5>Permalink</h5>
-          <ConnectedRefinementList attribute="permalink" />
+          <RefinementList attribute="post_type" limit={2} />
+          {/* <h5>Permalink</h5>
+          <ConnectedRefinementList attribute="permalink" /> */}
         </div>
         <div className="w-3/4 p-4">
+        <div className="relative flex items-center">
+        <FaSearch className="absolute text-gray-500 right-5 text-xl " />
+        <div className="w-full">
           <SearchBox />
+        </div>
+      </div>
           <Index indexName="artba_searchable_posts">
-            <h2>ARTBA</h2>
+            <p>ARTBA</p>
             <Results />
           </Index>
           <Index indexName="Newsline_searchable_posts">
-            <h2>Newsline</h2>
+            <p>Newsline</p>
             <Results />
           </Index>
           <Index indexName="tdf_searchable_posts">
-            <h2>TDF</h2>
+            <p>TDF</p>
             <Results />
           </Index>
 
           <Index indexName="novi_events">
-            <h2>Novi Events</h2>
+            <p>Novi Events</p>
             <NoviEventsHits />
           </Index>
         </div>
