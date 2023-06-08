@@ -49,7 +49,7 @@ const NoviEventsHits = connectHits(({ hits }) => (
     {hits.map(hit => (
       <div className="sm:px-6" key={hit.EventUniqueId}>
         <a href={hit.Url} target="_blank" rel="noopener noreferrer">
-        <h4 className="text-md leading-6 font-small text-gray-900">
+          <h4 className="text-md leading-6 font-small text-gray-900">
             {hit.Name}
           </h4>
         </a>
@@ -63,13 +63,14 @@ const NoviEventsHits = connectHits(({ hits }) => (
 
 
 // Custom Results component that only shows hits when a query has been made
-const Results = connectStateResults(
-  ({ searchState, searchResults }) => 
-    searchResults && searchResults.nbHits !== 0 
-      ? <Hits /> 
-      : <p className=" mt-4 text-red-400">
-        No results found for {searchState.query}</p>
+const Results = connectStateResults(({ searchState, searchResults }) =>
+  searchResults && searchResults.nbHits !== 0 ? (
+    <Hits />
+  ) : (
+    <p className="mt-4 text-red-400">No results found for {searchState.query}</p>
+  )
 );
+
 
 
 const CustomRefinementList = ({ items, refine }) => (
@@ -93,49 +94,63 @@ const CustomRefinementList = ({ items, refine }) => (
 const ConnectedRefinementList = connectRefinementList(CustomRefinementList);
 
 export default function Home() {
+  const [searchQuery, setSearchQuery] = useState("");
 
-
+  const onSearchStateChange = ({ query }) => {
+    setSearchQuery(query);
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8 mb-0 flex">
-      <InstantSearch searchClient={searchClient} indexName="artba_searchable_posts">
+      <InstantSearch
+        searchClient={searchClient}
+        indexName="artba_searchable_posts"
+        onSearchStateChange={onSearchStateChange}
+      >
         <Configure hitsPerPage={3} />
-        <div className="w-1/4 p-4">
-          <h2 className="text-lg leading-7 font-medium text-gray-900">Filter</h2>
-          <hr className="mt-2 mb-2" />
-          <h5>Category</h5>
-          <RefinementList attribute="taxonomies.category" limit={5} />
-          <h5>Author</h5>
-          <RefinementList attribute="post_author.display_name" limit={5} />
-          <h5>Post Type</h5>
-          <RefinementList attribute="post_type" limit={2} />
-          {/* <h5>Permalink</h5>
-          <ConnectedRefinementList attribute="permalink" /> */}
-        </div>
-        <div className="w-3/4 p-4">
-        <div className="relative flex items-center">
-        <FaSearch className="absolute text-gray-500 right-5 text-xl " />
-        <div className="w-full">
-          <SearchBox />
-        </div>
-      </div>
-          <Index indexName="artba_searchable_posts">
-            <p>ARTBA</p>
-            <Results />
-          </Index>
-          <Index indexName="Newsline_searchable_posts">
-            <p>Newsline</p>
-            <Results />
-          </Index>
-          <Index indexName="tdf_searchable_posts">
-            <p>TDF</p>
-            <Results />
-          </Index>
 
-          <Index indexName="novi_events">
-            <p>Novi Events</p>
-            <NoviEventsHits />
-          </Index>
+        {searchQuery && (
+          <div className="w-1/4 p-4">
+            <h2 className="text-lg leading-7 font-medium text-gray-900">Filter</h2>
+            <hr className="mt-2 mb-2" />
+            <h5>Category</h5>
+            <RefinementList attribute="taxonomies.category" limit={5} />
+            <h5>Author</h5>
+            <RefinementList attribute="post_author.display_name" limit={5} />
+            <h5>Post Type</h5>
+            <RefinementList attribute="post_type" limit={2} />
+          </div>
+        )}
+
+        <div className="w-3/4 p-4">
+          <div className="relative flex items-center">
+            <FaSearch className="absolute text-gray-500 right-5 text-xl " />
+            <div className="w-full">
+              <SearchBox />
+            </div>
+          </div>
+
+          {searchQuery && (
+            <>
+              <Index indexName="artba_searchable_posts">
+                <p>ARTBA</p>
+                <Results />
+              </Index>
+              <Index indexName="Newsline_searchable_posts">
+                <p>Newsline</p>
+                <Results />
+              </Index>
+              <Index indexName="tdf_searchable_posts">
+                <p>TDF</p>
+                <Results />
+              </Index>
+
+              <Index indexName="novi_events">
+                <p>Novi Events</p>
+                <NoviEventsHits />
+              </Index>
+            </>
+          )}
         </div>
       </InstantSearch>
     </div>
